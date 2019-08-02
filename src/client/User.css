@@ -1,0 +1,23 @@
+.user-header-container {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+}
+
+.table-header-container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.table-header-container svg {
+  opacity: 0.6;
+}
+
+.table-header-container svg.active {
+  opacity: 1;
+}
+
+.table-header-container svg:hover {
+  cursor: pointer;
+  opacity: 0.9;
+}
