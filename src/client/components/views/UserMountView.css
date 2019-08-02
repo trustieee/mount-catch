@@ -1,0 +1,4 @@
+.user-mount-view-ribbon-container {
+  display: flex;
+  justify-content: space-between;
+}

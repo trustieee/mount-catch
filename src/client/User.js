@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './User.css';
 import { MdViewList, MdGridOn, MdRefresh } from 'react-icons/md';
 
-const User = ({ user }) => {
+const User = ({ user, onRefreshClicked }) => {
   const [isListDisplay, setIsListDiplay] = useState(true);
 
   const handleListClick = () => {
@@ -13,10 +13,6 @@ const User = ({ user }) => {
   const handleGridClick = () => {
     if (!isListDisplay) return;
     setIsListDiplay(false);
-  };
-
-  const handleRefresh = e => {
-    e.preventDefault();
   };
 
   if (
@@ -45,7 +41,7 @@ const User = ({ user }) => {
 
       <div className="table-header-container">
         <div className="table-header-container-left">
-          <MdRefresh size="40" onClick={handleRefresh} />
+          <MdRefresh size="40" onClick={onRefreshClicked} />
         </div>
         <div className="table-header-container-right">
           <MdViewList
