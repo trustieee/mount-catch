@@ -22,7 +22,7 @@ UserProfileMeta.propTypes = {
   profile: PropTypes.shape({
     name: PropTypes.string.isRequired,
     realm: PropTypes.string.isRequired,
-    faction: PropTypes.number.isRequired
+    faction: PropTypes.string.isRequired
   })
 };
 

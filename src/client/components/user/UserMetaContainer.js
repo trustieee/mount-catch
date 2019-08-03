@@ -1,7 +1,7 @@
 import React from 'react';
 import UserProfileMeta from './UserProfileMeta';
 import UserMountMeta from './UserMountMeta';
-import './UserMeta.css';
+import './UserMetaContainer.css';
 import PropTypes from 'prop-types';
 
 const UserMeta = ({ user, loadingUser, loadingMounts, allMounts }) => (

@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import './Home.css';
-import UserMountView from '../views/UserMountView';
-import UserMeta from '../user/UserMeta';
-import Constants from '../../../constants';
+import UserMountView from '../views/ViewContainer';
+import UserMeta from '../user/UserMetaContainer';
+import Constants from '../../../shared/constants';
+import { getProfile, getMounts, getFactionName } from '../../../shared/utility';
+import { Models } from '../../../shared/defaultData';
 import Cookies from 'js-cookie';
 
 const Home = () => {
-  const [user, setUser] = useState(Constants.Models.user);
-  const [allMounts, setAllMounts] = useState(Constants.Models.mounts);
+  const [user, setUser] = useState(Models.user);
+  const [allMounts, setAllMounts] = useState(Models.mounts);
   const [loadingUser, setLoadingUser] = useState(true);
   const [loadingMounts, setLoadingMounts] = useState(true);
 
@@ -18,7 +20,7 @@ const Home = () => {
 
     const loadUser = () => {
       setLoadingUser(true);
-      fetch(Constants.API.getProfile(apiToken))
+      fetch(getProfile(apiToken))
         .then(resp => {
           return resp.json();
         })
@@ -27,7 +29,7 @@ const Home = () => {
             profile: {
               name: resp.name,
               realm: resp.realm,
-              faction: resp.faction
+              faction: getFactionName(resp.faction)
             },
             mounts: resp.mounts
           };
@@ -42,7 +44,7 @@ const Home = () => {
 
     const loadMounts = () => {
       setLoadingMounts(true);
-      fetch(Constants.API.getMounts(apiToken))
+      fetch(getMounts(apiToken))
         .then(resp => {
           return resp.json();
         })

@@ -4,10 +4,10 @@ import GridView from './GridView';
 import SelectViewControl from '../controls/SelectViewControl';
 import RefreshViewControl from '../controls/RefreshViewControl';
 import Loading from '../controls/Loading';
-import './UserMountView.css';
+import './ViewContainer.css';
 import PropTypes from 'prop-types';
 
-const UserMountView = ({ user, allMounts, loading }) => {
+const ViewContainer = ({ user, allMounts, loading }) => {
   const [isListView, setIsListView] = useState(true);
   return (
     <>
@@ -22,10 +22,10 @@ const UserMountView = ({ user, allMounts, loading }) => {
   );
 };
 
-UserMountView.propTypes = {
+ViewContainer.propTypes = {
   user: PropTypes.object.isRequired,
   allMounts: PropTypes.array.isRequired,
   loading: PropTypes.bool.isRequired
 };
 
-export default UserMountView;
+export default ViewContainer;
