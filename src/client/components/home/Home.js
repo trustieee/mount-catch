@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './Home.css';
-import UserMountView from '../views/ViewContainer';
+import ViewContainer from '../views/ViewContainer';
 import UserMeta from '../user/UserMetaContainer';
 import Constants from '../../../shared/constants';
 import { getProfile, getMounts, getFactionName } from '../../../shared/utility';
@@ -85,7 +85,7 @@ const Home = () => {
         loadingUser={loadingUser}
         loadingMounts={loadingMounts}
       />
-      <UserMountView
+      <ViewContainer
         user={user}
         allMounts={allMounts}
         loading={loadingMounts}

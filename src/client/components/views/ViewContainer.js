@@ -16,14 +16,24 @@ const ViewContainer = ({ user, allMounts, loading }) => {
         <SelectViewControl />
       </div>
       <div className="user-mount-view-content-container">
-        {loading ? <Loading /> : isListView ? <ListView /> : <GridView />}
+        {loading ? (
+          <Loading />
+        ) : isListView ? (
+          <ListView mounts={user.mounts.collected} />
+        ) : (
+          <GridView mounts={user.mounts.collected} />
+        )}
       </div>
     </>
   );
 };
 
 ViewContainer.propTypes = {
-  user: PropTypes.object.isRequired,
+  user: PropTypes.shape({
+    mounts: PropTypes.shape({
+      collected: PropTypes.array.isRequired
+    }).isRequired
+  }).isRequired,
   allMounts: PropTypes.array.isRequired,
   loading: PropTypes.bool.isRequired
 };
