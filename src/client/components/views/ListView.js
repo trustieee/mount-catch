@@ -9,6 +9,7 @@ const ListView = ({ mounts }) => {
             <th>#</th>
             <th>Name</th>
             <th>Wowhead</th>
+            <th>Obtained By</th>
           </tr>
         </thead>
         <tbody>
@@ -26,6 +27,7 @@ const ListView = ({ mounts }) => {
                     Link
                   </a>
                 </td>
+                <td>foo</td>
               </tr>
             );
           })}

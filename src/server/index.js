@@ -1,9 +1,16 @@
 require('dotenv').config();
+const fs = require('fs');
 const express = require('express');
 var passport = require('passport');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
+const Axios = require('axios');
 const request = require('request');
+const util = require('util');
+
+const readFileAsync = util.promisify(fs.readFile);
+const writeFileAsync = util.promisify(fs.writeFile);
+const accessFileAsync = util.promisify(fs.access);
 
 var BnetStrategy = require('passport-bnet').Strategy;
 var BNET_ID = process.env.BNET_ID;
@@ -55,15 +62,6 @@ app.get(
   }
 );
 
-app.get('/api/all-mounts/:token', (req, res, next) => {
-  const newurl = `https://us.api.blizzard.com/data/wow/mount/index?namespace=static-us&locale=en_US&access_token=${
-    req.params.token
-  }`;
-  request(newurl, (error, response, body) => {
-    if (!error && response.statusCode === 200) res.send(JSON.parse(body));
-  });
-});
-
 app.get('/api/mounts/:token', (req, res, next) => {
   const newurl = `https://us.api.blizzard.com/wow/character/bleeding-hollow/vessy?fields=mounts&locale=en_US&access_token=${
     req.params.token
@@ -73,26 +71,81 @@ app.get('/api/mounts/:token', (req, res, next) => {
   });
 });
 
-// app.get('/api', function(req, res) {
-//   if (req.isAuthenticated()) {
-//     var output = '<h1>Express OAuth Test</h1>' + req.user.id + '<br>';
-//     if (req.user.battletag) {
-//       output += req.user.battletag + '<br>';
-//     }
-//     output += '<a href="/logout">Logout</a>';
-//     res.send(output);
-//   } else {
-//     res.send(
-//       '<h1>Express OAuth Test</h1>' +
-//         '<a href="/auth/github">Login with Github</a><br>' +
-//         '<a href="/auth/bnet">Login with Bnet</a>'
-//     );
-//   }
-// });
-
 app.get('/api/logout', function(req, res) {
   req.logout();
   res.redirect('/');
 });
 
-app.listen(3001);
+const ALL_MOUNTS_FILE_NAME = 'all-mounts.json';
+let finalMountData = [];
+
+(async () => {
+  let fileExists = false;
+  try {
+    await accessFileAsync(ALL_MOUNTS_FILE_NAME);
+    fileExists = true;
+  } catch {}
+  console.log('exists: ', fileExists);
+  if (!fileExists) {
+    console.log('empty all mounts created');
+    console.log('writing all mounts');
+    const firstResponse = await Axios({
+      method: 'GET',
+      url: `https://us.api.blizzard.com/data/wow/mount/index?namespace=static-us&locale=en_US&access_token=${
+        process.env.TEMPORARY_ACCESS_TOKEN
+      }`
+    });
+
+    finalMountData = firstResponse.data.mounts.map(m => {
+      const href =
+        m.key.href +
+        `&locale=en_US&access_token=${process.env.TEMPORARY_ACCESS_TOKEN}`;
+      const id = m.key.href.match(/^.*data\/wow\/mount\/(\d+).*$/)[1];
+      const name = m.name;
+      return { id, href, name };
+    });
+
+    // by this point initial data is populated
+    const allMountPromises = finalMountData.map(async mount => {
+      const response = await Axios({
+        method: 'GET',
+        url: mount.href
+      });
+      const id = response.data.id;
+      const name = response.data.name;
+      const href = mount.href;
+      let sourceType = null;
+      let sourceName = null;
+      if (response.data.source) {
+        sourceType = response.data.source.type;
+        sourceName = response.data.source.name;
+      }
+      return { id, name, sourceType, sourceName, href };
+    });
+
+    const finishedMountData = await Promise.all(allMountPromises);
+    await writeFileAsync(
+      ALL_MOUNTS_FILE_NAME,
+      JSON.stringify(finishedMountData)
+    );
+
+    console.log('finished gathering final mount data from api');
+  } else {
+    console.log('mounts exist, storing it in memory now...');
+
+    finalMountData = JSON.parse(await readFileAsync(ALL_MOUNTS_FILE_NAME));
+    if (process.platform === 'win32') {
+      const stats = fs.statSync(ALL_MOUNTS_FILE_NAME);
+      console.log(`- created at ${stats.birthtime}`);
+    }
+  }
+
+  console.log(`${finalMountData.length} mounts cached into memory`);
+  // when we get here we have the mount data in memory
+  //  start up the express api
+  app.listen(3001, () => {
+    console.log('server up');
+  });
+})().catch(e => {
+  console.log('ERROR: ', e);
+});
