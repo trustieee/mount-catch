@@ -19,7 +19,7 @@ const ViewContainer = ({ user, allMounts, loading }) => {
         {loading ? (
           <Loading />
         ) : isListView ? (
-          <ListView mounts={user.mounts.collected} />
+          <ListView mounts={user.mounts.collected} allMounts={allMounts} />
         ) : (
           <GridView mounts={user.mounts.collected} />
         )}

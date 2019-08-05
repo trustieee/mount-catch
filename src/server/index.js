@@ -57,6 +57,7 @@ app.get(
   '/api/auth/bnet/callback',
   passport.authenticate('bnet', { failureRedirect: '/error' }),
   function(req, res) {
+    console.log(req.user.token);
     res.cookie('MOUNTCATCH_BNET_API_KEY', req.user.token);
     res.redirect('http://localhost:3000/foo');
   }
@@ -78,6 +79,10 @@ app.get('/api/logout', function(req, res) {
 
 const ALL_MOUNTS_FILE_NAME = 'all-mounts.json';
 let finalMountData = [];
+
+app.get('/api/all-mounts', (req, res, next) => {
+  res.send(finalMountData);
+});
 
 (async () => {
   let fileExists = false;

@@ -9,13 +9,12 @@ import Cookies from 'js-cookie';
 
 const Home = () => {
   const [user, setUser] = useState(Models.user);
-  const [allMounts, setAllMounts] = useState(Models.mounts);
+  const [allMounts, setAllMounts] = useState(null);
   const [loadingUser, setLoadingUser] = useState(true);
   const [loadingMounts, setLoadingMounts] = useState(true);
 
   useEffect(() => {
     const userCache = localStorage.getItem(Constants.CACHE.USER_PROFILE_CACHE);
-    const mountsCache = localStorage.getItem(Constants.CACHE.MOUNT_CACHE);
     const apiToken = Cookies.get(Constants.CACHE.BNET_API_KEY);
 
     const loadUser = () => {
@@ -42,21 +41,17 @@ const Home = () => {
       setLoadingUser(false);
     };
 
-    const loadMounts = () => {
+    if (!allMounts || allMounts.length === 0) {
       setLoadingMounts(true);
-      fetch(getMounts(apiToken))
+      fetch(getMounts())
         .then(resp => {
           return resp.json();
         })
         .then(resp => {
-          setAllMounts(resp.mounts);
-          localStorage.setItem(
-            Constants.CACHE.MOUNT_CACHE,
-            JSON.stringify(resp.mounts)
-          );
+          setAllMounts(resp);
+          setLoadingMounts(false);
         });
-      setLoadingMounts(false);
-    };
+    }
 
     if (!userCache) {
       if (!apiToken) throw new Error('no api token found');
@@ -66,28 +61,19 @@ const Home = () => {
       setUser(JSON.parse(userCache));
       setLoadingUser(false);
     }
-
-    if (!mountsCache) {
-      if (!apiToken) throw new Error('no api token found');
-      loadMounts();
-    } else {
-      setLoadingMounts(true);
-      setAllMounts(JSON.parse(mountsCache));
-      setLoadingMounts(false);
-    }
-  }, []);
+  }, [allMounts]);
 
   return (
     <>
       <UserMeta
         user={user}
-        allMounts={allMounts}
+        allMounts={allMounts || []}
         loadingUser={loadingUser}
         loadingMounts={loadingMounts}
       />
       <ViewContainer
         user={user}
-        allMounts={allMounts}
+        allMounts={allMounts || []}
         loading={loadingMounts}
       />
     </>

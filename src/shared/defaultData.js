@@ -14,12 +14,5 @@ export const Models = {
         { name: 'loading...' }
       ]
     }
-  },
-  mounts: [
-    { name: 'loading...' },
-    { name: 'loading...' },
-    { name: 'loading...' },
-    { name: 'loading...' },
-    { name: 'loading...' }
-  ]
+  }
 };

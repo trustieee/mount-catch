@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ListView = ({ mounts }) => {
+const ListView = ({ mounts, allMounts }) => {
   return (
     <div>
       <table className="table table-bordered table-hover">
@@ -8,8 +8,8 @@ const ListView = ({ mounts }) => {
           <tr>
             <th>#</th>
             <th>Name</th>
-            <th>Wowhead</th>
             <th>Obtained By</th>
+            <th>Wowhead</th>
           </tr>
         </thead>
         <tbody>
@@ -19,6 +19,10 @@ const ListView = ({ mounts }) => {
                 <td>{i}</td>
                 <td>{mount.name}</td>
                 <td>
+                  {allMounts.find(m => m.name === mount.name).sourceName ||
+                    'n/a'}
+                </td>
+                <td>
                   <a
                     href={`https://www.wowhead.com/item=${mount.itemId}`}
                     target="_blank"
@@ -27,7 +31,6 @@ const ListView = ({ mounts }) => {
                     Link
                   </a>
                 </td>
-                <td>foo</td>
               </tr>
             );
           })}

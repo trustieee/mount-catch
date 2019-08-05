@@ -1,5 +1,5 @@
 export const getProfile = token => `/api/mounts/${token}`;
-export const getMounts = token => `/api/all-mounts/${token}`;
+export const getMounts = () => `/api/all-mounts/`;
 export const getFactionName = factionId => {
   switch (factionId) {
     case 0:
