@@ -1,6 +1,6 @@
 import React from 'react';
 
-const GridView = () => {
+const GridView = ({ mounts, allMounts }) => {
   return <div>gridview</div>;
 };
 

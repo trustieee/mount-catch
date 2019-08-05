@@ -1,25 +1,51 @@
 import React from 'react';
+import './ListView.css';
+import { MdArrowDropDown, MdArrowDropUp } from 'react-icons/md';
 
 const ListView = ({ mounts, allMounts }) => {
+  const [ownedFilter, setOwnedFilter] = React.useState(false);
+  const [localMounts, setLocalMounts] = React.useState(allMounts);
+
+  const ownsMount = name => mounts.findIndex(m => m.name === name) >= 0;
+
+  const handleOwnedFilterClicked = () => {
+    setOwnedFilter(!ownedFilter);
+    // sort mounts here
+  };
+
+  const ownsMountStyle = name => {
+    return ownsMount(name)
+      ? {
+          textDecoration: 'line-through',
+          color: 'green'
+        }
+      : null;
+  };
+
   return (
     <div>
       <table className="table table-bordered table-hover">
         <thead className="thead-dark">
           <tr>
             <th>#</th>
-            <th>Name</th>
+            <th
+              className="list-view-table-header-name"
+              onClick={handleOwnedFilterClicked}
+            >
+              Name {ownedFilter ? <MdArrowDropDown /> : <MdArrowDropUp />}
+            </th>
             <th>Obtained By</th>
             <th>Wowhead</th>
           </tr>
         </thead>
         <tbody>
-          {mounts.map((mount, i) => {
+          {localMounts.map((mount, i) => {
             return (
-              <tr key={mount.spellId}>
-                <td>{i}</td>
+              <tr key={i} style={ownsMountStyle(mount.name)}>
+                <td>{i + 1}</td>
                 <td>{mount.name}</td>
                 <td>
-                  {allMounts.find(m => m.name === mount.name).sourceName ||
+                  {localMounts.find(m => m.name === mount.name).sourceName ||
                     'n/a'}
                 </td>
                 <td>

@@ -9,11 +9,16 @@ import PropTypes from 'prop-types';
 
 const ViewContainer = ({ user, allMounts, loading }) => {
   const [isListView, setIsListView] = useState(true);
+
+  const handleSelectViewClicked = () => {
+    setIsListView(!isListView);
+  };
+
   return (
     <>
       <div className="user-mount-view-ribbon-container">
         <RefreshViewControl />
-        <SelectViewControl />
+        <SelectViewControl onSelectViewClicked={handleSelectViewClicked} />
       </div>
       <div className="user-mount-view-content-container">
         {loading ? (
@@ -21,7 +26,7 @@ const ViewContainer = ({ user, allMounts, loading }) => {
         ) : isListView ? (
           <ListView mounts={user.mounts.collected} allMounts={allMounts} />
         ) : (
-          <GridView mounts={user.mounts.collected} />
+          <GridView mounts={user.mounts.collected} allMounts={allMounts} />
         )}
       </div>
     </>
