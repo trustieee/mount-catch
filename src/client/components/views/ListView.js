@@ -3,21 +3,42 @@ import './ListView.css';
 import { MdArrowDropDown, MdArrowDropUp } from 'react-icons/md';
 
 const ListView = ({ mounts, allMounts }) => {
+  const alphabetical = (a, b) =>
+    a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
+
   const [ownedFilter, setOwnedFilter] = React.useState(false);
-  const [localMounts, setLocalMounts] = React.useState(allMounts);
+  const [localMounts, setLocalMounts] = React.useState(
+    allMounts.sort(alphabetical)
+  );
 
   const ownsMount = name => mounts.findIndex(m => m.name === name) >= 0;
 
   const handleOwnedFilterClicked = () => {
-    setOwnedFilter(!ownedFilter);
-    // sort mounts here
+    const showUnowned = !ownedFilter;
+    setOwnedFilter(showUnowned);
+    setLocalMounts(
+      [...localMounts].sort((a, b) => {
+        if (showUnowned) {
+          return !ownsMount(a.name) && !ownsMount(b.name)
+            ? 1
+            : !ownsMount(a.name) && ownsMount(b.name)
+            ? -1
+            : ownsMount(a.name) && !ownsMount(b.name)
+            ? 1
+            : 0;
+        } else {
+          return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
+        }
+      })
+    );
   };
 
   const ownsMountStyle = name => {
     return ownsMount(name)
       ? {
           textDecoration: 'line-through',
-          color: 'green'
+          color: 'green',
+          backgroundColor: '#eee'
         }
       : null;
   };
@@ -32,7 +53,16 @@ const ListView = ({ mounts, allMounts }) => {
               className="list-view-table-header-name"
               onClick={handleOwnedFilterClicked}
             >
-              Name {ownedFilter ? <MdArrowDropDown /> : <MdArrowDropUp />}
+              Name{' '}
+              {ownedFilter ? (
+                <>
+                  <MdArrowDropDown /> (unowned)
+                </>
+              ) : (
+                <>
+                  <MdArrowDropUp /> (alphabetical)
+                </>
+              )}
             </th>
             <th>Obtained By</th>
             <th>Wowhead</th>
