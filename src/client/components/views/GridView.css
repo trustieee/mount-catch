@@ -1,0 +1,18 @@
+.grid-view-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+}
+
+.grid-view-mount-item {
+  width: 50px;
+  height: 50px;
+}
+
+.grid-view-mount-item:hover {
+  opacity: 0.5;
+}
+
+.grid-view-mount-item-owned {
+  opacity: 0.2;
+}

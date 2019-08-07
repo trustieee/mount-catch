@@ -8,7 +8,7 @@ import './ViewContainer.css';
 import PropTypes from 'prop-types';
 
 const ViewContainer = ({ user, allMounts, loading }) => {
-  const [isListView, setIsListView] = useState(true);
+  const [isListView, setIsListView] = useState(false);
 
   const handleSelectViewClicked = () => {
     setIsListView(!isListView);

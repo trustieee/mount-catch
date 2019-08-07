@@ -63,12 +63,28 @@ app.get(
   }
 );
 
+// memory cache for now, cleared on server restart
+const playerCache = {};
+
 app.get('/api/mounts/:token', (req, res, next) => {
+  // todo, get this from user instead
+  const tempName = 'Vessy';
+  if (playerCache.hasOwnProperty(tempName)) {
+    console.log('found player in cache');
+    res.send(playerCache[tempName]);
+    return;
+  }
+
   const newurl = `https://us.api.blizzard.com/wow/character/bleeding-hollow/vessy?fields=mounts&locale=en_US&access_token=${
     req.params.token
   }`;
   request(newurl, (error, response, body) => {
-    if (!error && response.statusCode === 200) res.send(JSON.parse(body));
+    if (!error && response.statusCode === 200) {
+      const result = JSON.parse(body);
+      playerCache[result.name] = result;
+      console.log('player added to cache');
+      res.send(result);
+    }
   });
 });
 
@@ -84,6 +100,11 @@ app.get('/api/all-mounts', (req, res, next) => {
   res.send(finalMountData);
 });
 
+// on server start we collect all mounts from the battlenet api
+//  and store it in a file cache on the server. this file is used for obtaining
+//  all mount information (not player mounts).
+//
+//  it will be generated if it doesn't exist on boot
 (async () => {
   let fileExists = false;
   try {
@@ -94,6 +115,22 @@ app.get('/api/all-mounts', (req, res, next) => {
   if (!fileExists) {
     console.log('empty all mounts created');
     console.log('writing all mounts');
+
+    const thirdResponse = await Axios({
+      method: 'GET',
+      url: `https://us.api.blizzard.com/wow/mount/?locale=en_US&access_token=${
+        process.env.TEMPORARY_ACCESS_TOKEN
+      }`
+    });
+    const thirdMountData = thirdResponse.data.mounts.map(m => {
+      const name = m.name;
+      const spellId = m.spellId;
+      const itemId = m.itemId;
+      const icon = m.icon;
+      const isFlying = m.isFlying;
+      return { name, spellId, itemId, icon, isFlying };
+    });
+
     const firstResponse = await Axios({
       method: 'GET',
       url: `https://us.api.blizzard.com/data/wow/mount/index?namespace=static-us&locale=en_US&access_token=${
@@ -110,29 +147,38 @@ app.get('/api/all-mounts', (req, res, next) => {
       return { id, href, name };
     });
 
-    // by this point initial data is populated
-    const allMountPromises = finalMountData.map(async mount => {
-      const response = await Axios({
-        method: 'GET',
-        url: mount.href
-      });
-      const id = response.data.id;
-      const name = response.data.name;
-      const href = mount.href;
-      let sourceType = null;
-      let sourceName = null;
-      if (response.data.source) {
-        sourceType = response.data.source.type;
-        sourceName = response.data.source.name;
+    const set = finalMountData.concat(thirdMountData);
+    const finalSet = [];
+    set.forEach(i => {
+      const match = finalSet.find(f => f.name === i.name);
+      if (match) {
+        Object.assign(match, i);
+      } else {
+        finalSet.push(i);
       }
-      return { id, name, sourceType, sourceName, href };
     });
+
+    await writeFileAsync(ALL_MOUNTS_FILE_NAME, JSON.stringify(finalSet));
+
+    // by this point initial data is populated
+    const allMountPromises = finalSet
+      .filter(m => m.href)
+      .map(async (mount, i) => {
+        const response = await Axios({
+          method: 'GET',
+          url: mount.href
+        });
+
+        return { ...response.data, ...mount };
+      });
 
     const finishedMountData = await Promise.all(allMountPromises);
     await writeFileAsync(
       ALL_MOUNTS_FILE_NAME,
       JSON.stringify(finishedMountData)
     );
+
+    finalMountData = finishedMountData;
 
     console.log('finished gathering final mount data from api');
   } else {

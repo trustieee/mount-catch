@@ -33,6 +33,16 @@ const ListView = ({ mounts, allMounts }) => {
     );
   };
 
+  const getObtainedBy = mount => {
+    const foundMount = localMounts.find(
+      m => m.name === mount.name && mount.source && mount.source.name
+    );
+
+    return foundMount && foundMount.source && foundMount.source
+      ? foundMount.source.name
+      : 'n/a';
+  };
+
   const ownsMountStyle = name => {
     return ownsMount(name)
       ? {
@@ -74,10 +84,7 @@ const ListView = ({ mounts, allMounts }) => {
               <tr key={i} style={ownsMountStyle(mount.name)}>
                 <td>{i + 1}</td>
                 <td>{mount.name}</td>
-                <td>
-                  {localMounts.find(m => m.name === mount.name).sourceName ||
-                    'n/a'}
-                </td>
+                <td>{getObtainedBy(mount)}</td>
                 <td>
                   <a
                     href={`https://www.wowhead.com/item=${mount.itemId}`}
